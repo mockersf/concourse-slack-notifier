@@ -15,8 +15,29 @@ struct Source {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "lowercase")]
+enum AlertType {
+    Success,
+    Failed,
+    Started,
+    Aborted,
+    Fixed,
+    Broke,
+    Custom,
+}
+
+impl Default for AlertType {
+    fn default() -> Self {
+        AlertType::Custom
+    }
+}
+
+#[derive(Deserialize)]
 struct OutParams {
-    alert_type: Option<String>,
+    alert_type: AlertType,
+    color: Option<String>,
+    concise: Option<bool>,
+    message: Option<String>,
     channel: String,
 }
 
@@ -28,58 +49,62 @@ struct Message {
 }
 
 impl Message {
-    fn new(ty: &str) -> Message {
-        match ty.as_ref() {
-            "success" => Message {
+    fn new(params: &OutParams) -> Message {
+        let mut message = match params.alert_type {
+            AlertType::Success => Message {
                 color: String::from("#32cd32"),
                 icon_url: String::from(
                     "https://ci.concourse-ci.org/public/images/favicon-succeeded.png",
                 ),
                 message: String::from("Success"),
             },
-            "failed" => Message {
+            AlertType::Failed => Message {
                 color: String::from("#d00000"),
                 icon_url: String::from(
                     "https://ci.concourse-ci.org/public/images/favicon-failed.png",
                 ),
                 message: String::from("Failed"),
             },
-            "started" => Message {
+            AlertType::Started => Message {
                 color: String::from("#f7cd42"),
                 icon_url: String::from(
                     "https://ci.concourse-ci.org/public/images/favicon-started.png",
                 ),
                 message: String::from("Started"),
             },
-            "aborted" => Message {
+            AlertType::Aborted => Message {
                 color: String::from("#8d4b32"),
                 icon_url: String::from(
                     "https://ci.concourse-ci.org/public/images/favicon-aborted.png",
                 ),
                 message: String::from("Aborted"),
             },
-            "fixed" => Message {
+            AlertType::Fixed => Message {
                 color: String::from("#32cd32"),
                 icon_url: String::from(
                     "https://ci.concourse-ci.org/public/images/favicon-succeeded.png",
                 ),
                 message: String::from("Fixed"),
             },
-            "broke" => Message {
+            AlertType::Broke => Message {
                 color: String::from("#d00000"),
                 icon_url: String::from(
                     "https://ci.concourse-ci.org/public/images/favicon-failed.png",
                 ),
                 message: String::from("Broke"),
             },
-            _ => Message {
+            AlertType::Custom => Message {
                 color: String::from("#35495c"),
                 icon_url: String::from(
                     "https://ci.concourse-ci.org/public/images/favicon-pending.png",
                 ),
                 message: String::from(""),
             },
+        };
+        if let Some(color) = params.color.as_ref() {
+            message.color = color.clone();
         }
+        message
     }
 
     fn to_message(self, build_metadata: BuildParameters, channel: String) -> slack_push::Message {
@@ -150,19 +175,17 @@ impl Resource for Test {
         source: Self::Source,
         params: Option<Self::OutParams>,
     ) -> OutOutput<Self::Version, Self::OutMetadata> {
-        if let Some(Self::OutParams {
-            alert_type,
-            channel,
-        }) = params
-        {
-            let message = Message::new(&alert_type.unwrap_or_else(|| String::from("default")));
+        if let Some(params) = params {
+            let message = Message::new(&params);
             reqwest::Client::new()
                 .post(reqwest::Url::parse(&source.url).expect("invalid WebHook URL"))
-                .json(&message.to_message(Self::build_metadata(), channel))
+                .json(&message.to_message(Self::build_metadata(), params.channel))
                 .send()
                 .unwrap()
                 .text()
                 .unwrap();
+        } else {
+            eprintln!("invalid parameters");
         }
         OutOutput {
             version: Self::Version {
