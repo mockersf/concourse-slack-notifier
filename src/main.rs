@@ -18,7 +18,7 @@ struct Source {
     channel: Option<String>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
 enum AlertType {
     Success,
@@ -70,6 +70,35 @@ impl Default for OutParams {
     }
 }
 
+#[derive(Serialize, Debug)]
+struct OutMetadata {
+    sent: bool,
+    channel: Option<String>,
+    #[serde(rename = "type")]
+    alert_type: Option<AlertType>,
+    error: Option<String>,
+}
+
+fn try_to_send(url: &str, message: &slack_push::Message) -> Result<(), String> {
+    reqwest::Client::new()
+        .post(reqwest::Url::parse(url).map_err(|err| format!("{}", err))?)
+        .json(message)
+        .send()
+        .map_err(|err| format!("{}", err))?
+        .text()
+        .map_err(|err| format!("{}", err))?;
+    Ok(())
+}
+
+// #[derive(Debug)]
+// struct Error {}
+// impl std::error::Error for Error {}
+// impl std::fmt::Display for Error {
+//     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+//         write!(f, "Error fetching version")
+//     }
+// }
+
 impl Resource for Test {
     type Source = Source;
     type Version = Version;
@@ -77,7 +106,7 @@ impl Resource for Test {
     type InParams = ();
     type InMetadata = ();
     type OutParams = OutParams;
-    type OutMetadata = ();
+    type OutMetadata = OutMetadata;
 
     fn resource_check(
         _source: Self::Source,
@@ -90,41 +119,56 @@ impl Resource for Test {
         _source: Self::Source,
         _version: Self::Version,
         _params: Option<Self::InParams>,
-        _path: &str,
-    ) -> InOutput<Self::Version, Self::InMetadata> {
-        InOutput {
+        _output_path: &str,
+    ) -> Result<InOutput<Self::Version, Self::InMetadata>, Box<std::error::Error>> {
+        Ok(InOutput {
             version: Self::Version {
                 ver: String::from("static"),
             },
             metadata: None,
-        }
+        })
     }
 
     fn resource_out(
         source: Self::Source,
         params: Option<Self::OutParams>,
+        input_path: &str,
     ) -> OutOutput<Self::Version, Self::OutMetadata> {
-        if let Some(params) = params {
+        let metadata = if let Some(params) = params {
             let params = Self::OutParams {
                 channel: source.channel,
                 ..params
             };
-            let message = Message::new(&params);
-            reqwest::Client::new()
-                .post(reqwest::Url::parse(&source.url).expect("invalid WebHook URL"))
-                .json(&message.to_slack_message(Self::build_metadata(), params))
-                .send()
-                .unwrap()
-                .text()
-                .unwrap();
+            let message =
+                Message::new(&params, input_path).to_slack_message(Self::build_metadata(), &params);
+            if let Result::Err(error) = try_to_send(&source.url, &message) {
+                Some(OutMetadata {
+                    alert_type: Some(params.alert_type),
+                    channel: params.channel,
+                    sent: false,
+                    error: Some(error),
+                })
+            } else {
+                Some(OutMetadata {
+                    alert_type: Some(params.alert_type),
+                    channel: params.channel,
+                    sent: true,
+                    error: None,
+                })
+            }
         } else {
-            eprintln!("invalid parameters");
-        }
+            Some(OutMetadata {
+                alert_type: None,
+                channel: None,
+                sent: false,
+                error: Some(String::from("invalid parameters")),
+            })
+        };
         OutOutput {
             version: Self::Version {
                 ver: String::from("static"),
             },
-            metadata: None,
+            metadata: metadata,
         }
     }
 }

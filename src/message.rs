@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use crate::{AlertType, OutParams};
-use concourse_resource::BuildParameters;
+use concourse_resource::BuildMetadata;
 
 #[derive(Serialize)]
 pub struct Message {
@@ -10,7 +10,7 @@ pub struct Message {
     pub icon_url: String,
 }
 
-fn name_and_url_from_params(build_metadata: &BuildParameters) -> (Option<String>, Option<String>) {
+fn name_and_url_from_params(build_metadata: &BuildMetadata) -> (Option<String>, Option<String>) {
     if let (Some(build_pipeline_name), Some(build_job_name), Some(build_name)) = (
         build_metadata.build_pipeline_name.as_ref(),
         build_metadata.build_job_name.as_ref(),
@@ -32,7 +32,7 @@ fn name_and_url_from_params(build_metadata: &BuildParameters) -> (Option<String>
 }
 
 impl Message {
-    pub(crate) fn new(params: &OutParams) -> Message {
+    pub(crate) fn new(params: &OutParams, input_path: &str) -> Message {
         let mut message = match params.alert_type {
             AlertType::Success => Message {
                 color: String::from("#32cd32"),
@@ -75,7 +75,7 @@ impl Message {
         }
         if let Some(text) = params.message.as_ref() {
             let mut path = std::path::PathBuf::new();
-            path.push("/tmp/build/put/");
+            path.push(input_path);
             path.push(text);
             message.text = Some(std::fs::read_to_string(path).unwrap_or_else(|_| text.clone()))
         }
@@ -84,8 +84,8 @@ impl Message {
 
     pub(crate) fn to_slack_message(
         self,
-        build_metadata: BuildParameters,
-        params: OutParams,
+        build_metadata: BuildMetadata,
+        params: &OutParams,
     ) -> slack_push::Message {
         let (job_name, build_url) = name_and_url_from_params(&build_metadata);
         slack_push::Message {
@@ -133,7 +133,7 @@ impl Message {
                 },
                 ..Default::default()
             }]),
-            channel: params.channel,
+            channel: params.channel.clone(),
 
             ..Default::default()
         }

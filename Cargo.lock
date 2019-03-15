@@ -72,7 +72,7 @@ dependencies = [
 [[package]]
 name = "concourse-resource"
 version = "0.1.0"
-source = "git+https://github.com/mockersf/concourse-resource-rs#32bdd7db173cb0fc831e051128962b5186105beb"
+source = "git+https://github.com/mockersf/concourse-resource-rs#757b76608e00bbd135cc51d90454faf548c177ca"
 dependencies = [
  "serde 1.0.89 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.39 (registry+https://github.com/rust-lang/crates.io-index)",
