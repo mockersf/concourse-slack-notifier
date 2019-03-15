@@ -5,6 +5,7 @@ WORKDIR /src
 COPY . /src
 
 RUN cargo build --release
+RUN strip target/x86_64-unknown-linux-musl/release/concourse-slack-notifier
 
 FROM alpine:3.8
 
