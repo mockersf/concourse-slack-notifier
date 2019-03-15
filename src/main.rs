@@ -9,7 +9,7 @@ struct Test {}
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Version {
-    refid: String,
+    ver: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -93,7 +93,7 @@ impl Resource for Test {
     ) -> InOutput<Self::Version, Self::InMetadata> {
         InOutput {
             version: Self::Version {
-                refid: String::from("static"),
+                ver: String::from("static"),
             },
             metadata: None,
         }
@@ -117,7 +117,7 @@ impl Resource for Test {
         }
         OutOutput {
             version: Self::Version {
-                refid: String::from("static"),
+                ver: String::from("static"),
             },
             metadata: None,
         }
