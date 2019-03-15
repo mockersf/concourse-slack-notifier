@@ -72,7 +72,7 @@ dependencies = [
 [[package]]
 name = "concourse-resource"
 version = "0.1.0"
-source = "git+https://github.com/mockersf/concourse-resource-rs#f06beed6119ab6272b683aad4d5e34ea0bb73c1b"
+source = "git+https://github.com/mockersf/concourse-resource-rs#32bdd7db173cb0fc831e051128962b5186105beb"
 dependencies = [
  "serde 1.0.89 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.39 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -846,7 +846,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "slack_push"
 version = "0.1.0"
-source = "git+https://github.com/mockersf/slack-push#a8261f2658c83031e1f4f7c79a66bb00250ee710"
+source = "git+https://github.com/mockersf/slack-push#eef0a9fc5ac2e39812413e0e2d7b145e39eb8b2f"
 dependencies = [
  "serde 1.0.89 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
