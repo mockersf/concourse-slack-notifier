@@ -92,7 +92,7 @@ impl Message {
                 } else {
                     self.text
                         .clone()
-                        .or_else(|| serde_json::to_string(&params.alert_type).ok())
+                        .or_else(|| Some(String::from(params.alert_type.name())))
                 },
                 text: if params.concise { self.text } else { None },
                 color: Some(self.color),

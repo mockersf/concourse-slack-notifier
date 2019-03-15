@@ -17,7 +17,7 @@ struct Source {
     url: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
 enum AlertType {
     Success,
@@ -27,6 +27,18 @@ enum AlertType {
     // Fixed,
     // Broke,
     Custom,
+}
+
+impl AlertType {
+    fn name(&self) -> &'static str {
+        match self {
+            AlertType::Success => "Success",
+            AlertType::Failed => "Failed",
+            AlertType::Started => "Started",
+            AlertType::Aborted => "Aborted",
+            AlertType::Custom => "Custom",
+        }
+    }
 }
 
 impl Default for AlertType {
