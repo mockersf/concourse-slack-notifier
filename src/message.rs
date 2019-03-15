@@ -74,7 +74,10 @@ impl Message {
             message.color = color.clone();
         }
         if let Some(text) = params.message.as_ref() {
-            message.text = Some(std::fs::read_to_string(text).unwrap_or_else(|_| text.clone()))
+            let mut path = std::path::PathBuf::new();
+            path.push("/tmp/build/put/");
+            path.push(text);
+            message.text = Some(std::fs::read_to_string(path).unwrap_or_else(|_| text.clone()))
         }
         message
     }
