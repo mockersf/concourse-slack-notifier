@@ -15,6 +15,7 @@ struct Version {
 #[derive(Deserialize, Debug)]
 struct Source {
     url: String,
+    channel: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -104,6 +105,10 @@ impl Resource for Test {
         params: Option<Self::OutParams>,
     ) -> OutOutput<Self::Version, Self::OutMetadata> {
         if let Some(params) = params {
+            let params = Self::OutParams {
+                channel: source.channel,
+                ..params
+            };
             let message = Message::new(&params);
             reqwest::Client::new()
                 .post(reqwest::Url::parse(&source.url).expect("invalid WebHook URL"))
