@@ -10,7 +10,7 @@ FROM alpine:3.8
 
 RUN apk add --no-cache ca-certificates
 
-COPY --from=build /src/target/x86_64-unknown-linux-musl/release/my-slack-resource /opt/resource/main
+COPY --from=build /src/target/x86_64-unknown-linux-musl/release/concourse-slack-notifier /opt/resource/main
 RUN ln -s /opt/resource/main /opt/resource/check
 RUN ln -s /opt/resource/main /opt/resource/in
 RUN ln -s /opt/resource/main /opt/resource/out
