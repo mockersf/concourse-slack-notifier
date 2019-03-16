@@ -11,19 +11,19 @@ pub struct Message {
 }
 
 fn name_and_url_from_params(build_metadata: &BuildMetadata) -> (Option<String>, Option<String>) {
-    if let (Some(build_pipeline_name), Some(build_job_name), Some(build_name)) = (
-        build_metadata.build_pipeline_name.as_ref(),
-        build_metadata.build_job_name.as_ref(),
-        build_metadata.build_name.as_ref(),
+    if let (Some(pipeline_name), Some(job_name), Some(name)) = (
+        build_metadata.pipeline_name.as_ref(),
+        build_metadata.job_name.as_ref(),
+        build_metadata.name,
     ) {
-        let job_name = format!("{}/{} #{}", build_pipeline_name, build_job_name, build_name,);
+        let job_name = format!("{}/{} #{}", pipeline_name, job_name, name,);
         let build_url = format!(
             "{}/teams/{}/pipelines/{}/jobs/{}/builds/{}",
             build_metadata.atc_external_url,
-            urlencoding::encode(&build_metadata.build_team_name),
-            urlencoding::encode(&build_pipeline_name),
-            urlencoding::encode(&build_job_name),
-            urlencoding::encode(&build_name),
+            urlencoding::encode(&build_metadata.team_name),
+            urlencoding::encode(&pipeline_name),
+            urlencoding::encode(&job_name),
+            name,
         );
         (Some(job_name), Some(build_url))
     } else {
@@ -34,14 +34,14 @@ fn name_and_url_from_params(build_metadata: &BuildMetadata) -> (Option<String>, 
 impl Message {
     pub(crate) fn new(params: &OutParams, input_path: &str) -> Message {
         let mut message = match params.alert_type {
-            AlertType::Success => Message {
+            AlertType::Success | AlertType::Fixed => Message {
                 color: String::from("#32cd32"),
                 icon_url: String::from(
                     "https://ci.concourse-ci.org/public/images/favicon-succeeded.png",
                 ),
                 text: None,
             },
-            AlertType::Failed => Message {
+            AlertType::Failed | AlertType::Broke => Message {
                 color: String::from("#d00000"),
                 icon_url: String::from(
                     "https://ci.concourse-ci.org/public/images/favicon-failed.png",
@@ -82,7 +82,7 @@ impl Message {
         message
     }
 
-    pub(crate) fn to_slack_message(
+    pub(crate) fn into_slack_message(
         self,
         build_metadata: BuildMetadata,
         params: &OutParams,
@@ -110,23 +110,19 @@ impl Message {
                             value: Some(format!(
                                 "{}/{}",
                                 build_metadata
-                                    .build_pipeline_name
+                                    .pipeline_name
                                     .as_ref()
                                     .map(String::as_ref)
                                     .unwrap_or("unknown-pipeline"),
                                 build_metadata
-                                    .build_job_name
+                                    .job_name
                                     .unwrap_or_else(|| String::from("unknown-job"))
                             )),
                             short: Some(true),
                         },
                         slack_push::message::AttachmentField {
                             title: Some(String::from("Build")),
-                            value: Some(
-                                build_metadata
-                                    .build_name
-                                    .unwrap_or_else(|| String::from("unknown-build")),
-                            ),
+                            value: Some(build_metadata.name.unwrap_or(0).to_string()),
                             short: Some(true),
                         },
                     ])
