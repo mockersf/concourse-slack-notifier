@@ -7,9 +7,14 @@ COPY . /src
 RUN cargo build --release
 RUN strip target/x86_64-unknown-linux-musl/release/concourse-slack-notifier
 
-FROM alpine:3.8
 
-RUN apk add --no-cache ca-certificates
+FROM alpine as certs
+
+RUN apk update && apk add ca-certificates
+
+FROM busybox:musl
+
+COPY --from=certs /etc/ssl/certs /etc/ssl/certs
 
 COPY --from=build /src/target/x86_64-unknown-linux-musl/release/concourse-slack-notifier /opt/resource/main
 RUN ln -s /opt/resource/main /opt/resource/check
