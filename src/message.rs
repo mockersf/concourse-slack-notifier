@@ -10,24 +10,39 @@ pub struct Message {
     pub icon_url: String,
 }
 
-fn name_and_url_from_params(build_metadata: &BuildMetadata) -> (Option<String>, Option<String>) {
+struct FormattedBuildInfo {
+    job_name: String,
+    build_name: String,
+    build_number: String,
+    build_url: Option<String>,
+}
+
+fn formatted_build_info_from_params(build_metadata: &BuildMetadata) -> FormattedBuildInfo {
     if let (Some(pipeline_name), Some(job_name), Some(name)) = (
         build_metadata.pipeline_name.as_ref(),
         build_metadata.job_name.as_ref(),
         build_metadata.name,
     ) {
-        let job_name = format!("{}/{} #{}", pipeline_name, job_name, name,);
-        let build_url = format!(
-            "{}/teams/{}/pipelines/{}/jobs/{}/builds/{}",
-            build_metadata.atc_external_url,
-            urlencoding::encode(&build_metadata.team_name),
-            urlencoding::encode(&pipeline_name),
-            urlencoding::encode(&job_name),
-            name,
-        );
-        (Some(job_name), Some(build_url))
+        FormattedBuildInfo {
+            job_name: format!("{}/{}", pipeline_name, job_name),
+            build_name: format!("{}/{} #{}", pipeline_name, job_name, name,),
+            build_number: format!("#{}", name),
+            build_url: Some(format!(
+                "{}/teams/{}/pipelines/{}/jobs/{}/builds/{}",
+                build_metadata.atc_external_url,
+                urlencoding::encode(&build_metadata.team_name),
+                urlencoding::encode(&pipeline_name),
+                urlencoding::encode(&job_name),
+                name,
+            )),
+        }
     } else {
-        (Some(String::from("unknown job")), None)
+        FormattedBuildInfo {
+            job_name: String::from("unknown job"),
+            build_name: String::from("unknown build"),
+            build_number: String::from("unknown build"),
+            build_url: None,
+        }
     }
 }
 
@@ -87,45 +102,40 @@ impl Message {
         build_metadata: BuildMetadata,
         params: &OutParams,
     ) -> slack_push::Message {
-        let (job_name, build_url) = name_and_url_from_params(&build_metadata);
+        let formatted_build_info = formatted_build_info_from_params(&build_metadata);
         slack_push::Message {
             attachments: Some(vec![slack_push::message::Attachment {
-                author_name: if params.concise {
-                    job_name
-                } else {
-                    self.text
-                        .clone()
-                        .or_else(|| Some(String::from(params.alert_type.name())))
+                author_name: match params.mode {
+                    crate::Mode::Concise => {
+                        Some(self.text.clone().unwrap_or(formatted_build_info.build_name))
+                    }
+                    crate::Mode::Normal | crate::Mode::NormalWithInfo => Some(format!(
+                        "{} - {}",
+                        formatted_build_info.build_name,
+                        params.alert_type.name()
+                    )),
                 },
-                text: if params.concise { self.text } else { None },
+                text: match params.mode {
+                    crate::Mode::Concise => None,
+                    crate::Mode::Normal | crate::Mode::NormalWithInfo => self.text,
+                },
                 color: Some(self.color),
-                footer: build_url,
+                footer: formatted_build_info.build_url,
                 footer_icon: Some(self.icon_url),
-                fields: if params.concise {
-                    None
-                } else {
-                    Some(vec![
+                fields: match params.mode {
+                    crate::Mode::Concise | crate::Mode::Normal => None,
+                    crate::Mode::NormalWithInfo => Some(vec![
                         slack_push::message::AttachmentField {
                             title: Some(String::from("Job")),
-                            value: Some(format!(
-                                "{}/{}",
-                                build_metadata
-                                    .pipeline_name
-                                    .as_ref()
-                                    .map(String::as_ref)
-                                    .unwrap_or("unknown-pipeline"),
-                                build_metadata
-                                    .job_name
-                                    .unwrap_or_else(|| String::from("unknown-job"))
-                            )),
+                            value: Some(formatted_build_info.job_name),
                             short: Some(true),
                         },
                         slack_push::message::AttachmentField {
                             title: Some(String::from("Build")),
-                            value: Some(build_metadata.name.unwrap_or(0).to_string()),
+                            value: Some(formatted_build_info.build_number),
                             short: Some(true),
                         },
-                    ])
+                    ]),
                 },
                 ..Default::default()
             }]),

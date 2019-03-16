@@ -29,7 +29,7 @@ struct ConcourseCredentials {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 enum AlertType {
     Success,
     Failed,
@@ -60,12 +60,20 @@ impl Default for AlertType {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[serde(rename_all = "snake_case")]
+enum Mode {
+    Concise,
+    Normal,
+    NormalWithInfo,
+}
+
 #[derive(Deserialize, Debug)]
 #[serde(default)]
 struct OutParams {
     alert_type: AlertType,
     color: Option<String>,
-    concise: bool,
+    mode: Mode,
     message: Option<String>,
     channel: Option<String>,
 }
@@ -75,7 +83,7 @@ impl Default for OutParams {
         Self {
             alert_type: AlertType::default(),
             color: None,
-            concise: false,
+            mode: Mode::NormalWithInfo,
             message: None,
             channel: None,
         }

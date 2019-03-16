@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(PartialEq, Deserialize, Debug)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub(crate) enum Status {
     Started,
     Pending,
