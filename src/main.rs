@@ -90,7 +90,7 @@ impl Default for OutParams {
     }
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, IntoMetadataKV)]
 struct OutMetadata {
     sent: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -99,44 +99,6 @@ struct OutMetadata {
     alert_type: Option<AlertType>,
     #[serde(skip_serializing_if = "Option::is_none")]
     error: Option<String>,
-}
-
-impl Into<Vec<concourse_resource::KV>> for OutMetadata {
-    fn into(self) -> Vec<concourse_resource::KV> {
-        let mut md = Vec::new();
-
-        md.push(concourse_resource::KV {
-            name: String::from("sent"),
-            value: if self.sent {
-                String::from("true")
-            } else {
-                String::from("false")
-            },
-        });
-
-        if let Some(channel) = self.channel {
-            md.push(concourse_resource::KV {
-                name: String::from("channel"),
-                value: channel,
-            })
-        }
-
-        if let Some(alert_type) = self.alert_type {
-            md.push(concourse_resource::KV {
-                name: String::from("alert_type"),
-                value: String::from(alert_type.name()),
-            })
-        }
-
-        if let Some(error) = self.error {
-            md.push(concourse_resource::KV {
-                name: String::from("error"),
-                value: error,
-            })
-        }
-
-        md
-    }
 }
 
 fn try_to_send(url: &str, message: &slack_push::Message) -> Result<(), String> {
