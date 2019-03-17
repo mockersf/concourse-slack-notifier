@@ -1,0 +1,34 @@
+language: rust
+
+matrix:
+  fast_finish: true
+  include:
+    - name: stable
+      env: CACHE_JOB=stable
+      rust: stable
+    - name: beta
+      env: CACHE_JOB=beta
+      rust: stable
+    - name: nightly
+      env: CACHE_JOB=nightly
+      rust: stable
+    - name: rustfmt
+      env: CACHE_JOB=stable
+      rust: stable
+      install:
+        - rustup component add rustfmt
+      script:
+        - cargo fmt -- --check
+    - name: clippy
+      env: CACHE_JOB=stable
+      rust: stable
+      install:
+        - rustup component add clippy
+      script:
+        - cargo clippy
+
+cache:
+  - cargo
+
+script:
+  - cargo test
