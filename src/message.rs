@@ -112,7 +112,7 @@ impl Message {
                     crate::Mode::Normal | crate::Mode::NormalWithInfo => Some(format!(
                         "{} - {}",
                         formatted_build_info.build_name,
-                        params.alert_type.name()
+                        params.alert_type.message()
                     )),
                 },
                 text: match params.mode {

@@ -41,7 +41,7 @@ enum AlertType {
 }
 
 impl AlertType {
-    fn name(&self) -> &'static str {
+    fn message(&self) -> &'static str {
         match self {
             AlertType::Success => "Success",
             AlertType::Failed => "Failed",
@@ -49,7 +49,7 @@ impl AlertType {
             AlertType::Aborted => "Aborted",
             AlertType::Fixed => "Fixed",
             AlertType::Broke => "Broke",
-            AlertType::Custom => "Custom",
+            AlertType::Custom => "Build Finished",
         }
     }
 }
@@ -68,7 +68,13 @@ enum Mode {
     NormalWithInfo,
 }
 
-#[derive(Deserialize, Debug)]
+impl Default for Mode {
+    fn default() -> Self {
+        Mode::NormalWithInfo
+    }
+}
+
+#[derive(Deserialize, Debug, Default)]
 #[serde(default)]
 struct OutParams {
     alert_type: AlertType,
@@ -76,18 +82,6 @@ struct OutParams {
     mode: Mode,
     message: Option<String>,
     channel: Option<String>,
-}
-
-impl Default for OutParams {
-    fn default() -> Self {
-        Self {
-            alert_type: AlertType::default(),
-            color: None,
-            mode: Mode::NormalWithInfo,
-            message: None,
-            channel: None,
-        }
-    }
 }
 
 #[derive(Serialize, Debug, IntoMetadataKV)]
@@ -122,14 +116,14 @@ impl Resource for Test {
     type OutMetadata = OutMetadata;
 
     fn resource_check(
-        _source: Self::Source,
+        _source: Option<Self::Source>,
         _version: Option<Self::Version>,
     ) -> Vec<Self::Version> {
         vec![]
     }
 
     fn resource_in(
-        _source: Self::Source,
+        _source: Option<Self::Source>,
         _version: Self::Version,
         _params: Option<Self::InParams>,
         _output_path: &str,
@@ -143,11 +137,13 @@ impl Resource for Test {
     }
 
     fn resource_out(
-        source: Self::Source,
+        source: Option<Self::Source>,
         params: Option<Self::OutParams>,
         input_path: &str,
     ) -> OutOutput<Self::Version, Self::OutMetadata> {
-        let metadata = if let Some(mut params) = params {
+        let metadata = if let Some(source) = source {
+            let mut params = params.unwrap_or_default();
+
             if params.channel.is_none() && source.channel.is_some() {
                 params.channel = source.channel.clone();
             }
@@ -184,7 +180,7 @@ impl Resource for Test {
                 alert_type: None,
                 channel: None,
                 sent: false,
-                error: Some(String::from("invalid parameters")),
+                error: Some(String::from("missing resource configuration")),
             }
         };
 
