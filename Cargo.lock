@@ -74,9 +74,9 @@ dependencies = [
 [[package]]
 name = "concourse-resource"
 version = "0.1.0"
-source = "git+https://github.com/mockersf/concourse-resource-rs#f7881e86cf8898a3522007989aa72ac670350da6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "concourse-resource-derive 0.1.0 (git+https://github.com/mockersf/concourse-resource-rs)",
+ "concourse-resource-derive 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.89 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.39 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -84,7 +84,7 @@ dependencies = [
 [[package]]
 name = "concourse-resource-derive"
 version = "0.1.0"
-source = "git+https://github.com/mockersf/concourse-resource-rs#f7881e86cf8898a3522007989aa72ac670350da6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "quote 0.6.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "syn 0.15.29 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -94,7 +94,7 @@ dependencies = [
 name = "concourse-slack-notifier"
 version = "0.1.0"
 dependencies = [
- "concourse-resource 0.1.0 (git+https://github.com/mockersf/concourse-resource-rs)",
+ "concourse-resource 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "reqwest 0.9.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.89 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.39 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1167,8 +1167,8 @@ dependencies = [
 "checksum cc 1.0.31 (registry+https://github.com/rust-lang/crates.io-index)" = "c9ce8bb087aacff865633f0bd5aeaed910fe2fe55b55f4739527f2e023a2e53d"
 "checksum cfg-if 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)" = "11d43355396e872eefb45ce6342e4374ed7bc2b3a502d1b28e36d6e23c05d1f4"
 "checksum cloudabi 0.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "ddfc5b9aa5d4507acaf872de71051dfd0e309860e88966e1051e462a077aac4f"
-"checksum concourse-resource 0.1.0 (git+https://github.com/mockersf/concourse-resource-rs)" = "<none>"
-"checksum concourse-resource-derive 0.1.0 (git+https://github.com/mockersf/concourse-resource-rs)" = "<none>"
+"checksum concourse-resource 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "446b879e0d07fd6ce184fe2d93447626185bbb820a804eb56d7a56f591734035"
+"checksum concourse-resource-derive 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "6f23f672008b3ece72f53a19d6a6e4db0772fa429e2534a5c2c5df5e20ed41d9"
 "checksum core-foundation 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "286e0b41c3a20da26536c6000a280585d519fd07b3956b43aed8a79e9edce980"
 "checksum core-foundation-sys 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "716c271e8613ace48344f723b60b900a93150271e5be206212d052bbc0883efa"
 "checksum crc32fast 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ba125de2af0df55319f41944744ad91c71113bf74a4646efff39afe1f6842db1"
