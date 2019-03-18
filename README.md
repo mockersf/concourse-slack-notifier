@@ -29,6 +29,15 @@ See the [Concourse docs](https://concourse-ci.org/resource-types.html) for more 
 * `username`: *Optional.* Concourse local user (or basic auth) username. Required for non-public pipelines if using alert type `fixed` or `broke`
 * `password`: *Optional.* Concourse local user (or basic auth) password. Required for non-public pipelines if using alert type `fixed` or `broke`
 
+```yaml
+resources:
+
+- name: notify
+  type: slack-notifier
+  source:
+    url: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+
+```
 ## Behavior
 
 ### `check`: No operation.
@@ -46,6 +55,25 @@ Sends a structured message to Slack based on the alert type and mode.
 - `message`: *Optional.* The status message at the top of the alert. Defaults to name of alert type. If it's a file path from an input, will use the content of the file.
 - `color`: *Optional.* The color of the notification bar as a hexadecimal. Defaults to the icon color of the alert type.
 - `mode`: *Optional.* The amount of information displayed in the message. See [Modes](#modes). Defaults to `normal_with_info`
+
+basic configuration:
+```yaml
+jobs:
+  plan:
+  - put: notify
+```
+
+with an alert type, a mode and a message
+```yaml
+jobs:
+  plan:
+  - put: notify
+    params:
+      message: my job failed
+      alert_type: failed
+      mode: concise
+```
+
 
 #### Alert Types
 
