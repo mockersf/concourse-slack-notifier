@@ -36,8 +36,8 @@ resources:
   type: slack-notifier
   source:
     url: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
-
 ```
+
 ## Behavior
 
 ### `check`: No operation.
@@ -70,10 +70,9 @@ jobs:
   - put: notify
     params:
       message: my job failed
-      alert_type: failed
       mode: concise
+      alert_type: failed
 ```
-
 
 #### Alert Types
 
