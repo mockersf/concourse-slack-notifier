@@ -52,9 +52,10 @@ Sends a structured message to Slack based on the alert type and mode.
 
 - `alert_type`: *Optional.* The type of alert to send to Slack. See [Alert Types](#alert-types). Defaults to `custom`.
 - `channel`: *Optional.* Channel where this message is posted. Defaults to the `channel` setting in Source.
-- `message`: *Optional.* The status message at the top of the alert. Defaults to name of alert type. If it's a file path from an input, will use the content of the file.
+- `message`: *Optional.* The status message at the top of the alert. Defaults to name of alert type.
+- `message_file`: *Optional.* The path to a file to use as message. The step will fail if the file doesn't exists unless `message` is also specified.
 - `color`: *Optional.* The color of the notification bar as a hexadecimal. Defaults to the icon color of the alert type.
-- `mode`: *Optional.* The amount of information displayed in the message. See [Modes](#modes). Defaults to `normal_with_info`
+- `mode`: *Optional.* The amount of information displayed in the message. See [Modes](#modes). Defaults to `normal_with_info`.
 
 basic configuration:
 ```yaml

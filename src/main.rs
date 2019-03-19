@@ -82,6 +82,7 @@ struct OutParams {
     mode: Mode,
     message: Option<String>,
     channel: Option<String>,
+    message_file: Option<String>,
 }
 
 #[derive(Serialize, Debug, IntoMetadataKV)]

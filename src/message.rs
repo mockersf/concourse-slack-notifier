@@ -88,11 +88,23 @@ impl Message {
         if let Some(color) = params.color.as_ref() {
             message.color = color.clone();
         }
-        if let Some(text) = params.message.as_ref() {
-            let mut path = std::path::PathBuf::new();
-            path.push(input_path);
-            path.push(text);
-            message.text = Some(std::fs::read_to_string(path).unwrap_or_else(|_| text.clone()))
+        match (params.message_file.as_ref(), params.message.as_ref()) {
+            (Some(file), Some(text)) => {
+                let mut path = std::path::PathBuf::new();
+                path.push(input_path);
+                path.push(file);
+                message.text = Some(std::fs::read_to_string(path).unwrap_or_else(|_| text.clone()));
+            }
+            (Some(file), None) => {
+                let mut path = std::path::PathBuf::new();
+                path.push(input_path);
+                path.push(file);
+                message.text = Some(std::fs::read_to_string(path).expect("error reading file"));
+            }
+            (None, Some(text)) => {
+                message.text = Some(text.clone());
+            }
+            (_, _) => {}
         }
         message
     }
