@@ -2,7 +2,7 @@
 
 A structured and opinionated Slack notification resource for [Concourse](https://concourse.ci/). It started as a rewrite of [arbourd/concourse-slack-alert-resource](https://github.com/arbourd/concourse-slack-alert-resource) in Rust to add a few features, mainly reading the message from a file or being able to send shorter messages that still had a similar format.
 
-<img src="./img/custom.png">
+<img src="https://raw.githubusercontent.com/mockersf/concourse-slack-notifier/master/img/custom.png">
 
 The message is built by using Concourse's [resource metadata](https://concourse-ci.org/implementing-resources.html#resource-metadata) to show the pipeline, job, build number and a URL.
 
@@ -78,35 +78,35 @@ jobs:
 
 - `custom`
 
-  <img src="./img/custom.png" width="75%">
+  <img src="https://raw.githubusercontent.com/mockersf/concourse-slack-notifier/master/img/custom.png" width="75%">
 
 - `success`
 
-  <img src="./img/success.png" width="75%">
+  <img src="https://raw.githubusercontent.com/mockersf/concourse-slack-notifier/master/img/success.png" width="75%">
 
 - `failed`
 
-  <img src="./img/failed.png" width="75%">
+  <img src="https://raw.githubusercontent.com/mockersf/concourse-slack-notifier/master/img/failed.png" width="75%">
 
 - `started`
 
-  <img src="./img/started.png" width="75%">
+  <img src="https://raw.githubusercontent.com/mockersf/concourse-slack-notifier/master/img/started.png" width="75%">
 
 - `aborted`
 
-  <img src="./img/aborted.png" width="75%">
+  <img src="https://raw.githubusercontent.com/mockersf/concourse-slack-notifier/master/img/aborted.png" width="75%">
 
 - `fixed`
 
   Fixed is a special alert type that only alerts if the previous build did not succeed. Fixed requires `username` and `password` to be set for the resource if the pipeline is not public.
 
-  <img src="./img/fixed.png" width="75%">
+  <img src="https://raw.githubusercontent.com/mockersf/concourse-slack-notifier/master/img/fixed.png" width="75%">
 
 - `broke`
 
   Broke is a special alert type that only alerts if the previous build succeed. Broke requires `username` and `password` to be set for the resource if the pipeline is not public.
 
-  <img src="./img/broke.png" width="75%">
+  <img src="https://raw.githubusercontent.com/mockersf/concourse-slack-notifier/master/img/broke.png" width="75%">
 
 #### Modes
 
@@ -114,12 +114,12 @@ Examples notifications with a messages with the different modes:
 
 - `concise`
 
-  <img src="./img/concise.png" width="75%">
+  <img src="https://raw.githubusercontent.com/mockersf/concourse-slack-notifier/master/img/concise.png" width="75%">
 
 - `normal`
 
-  <img src="./img/normal.png" width="75%">
+  <img src="https://raw.githubusercontent.com/mockersf/concourse-slack-notifier/master/img/normal.png" width="75%">
 
 - `normal_with_info`
 
-  <img src="./img/normal_with_info.png" width="75%">
+  <img src="https://raw.githubusercontent.com/mockersf/concourse-slack-notifier/master/img/normal_with_info.png" width="75%">
