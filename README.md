@@ -28,6 +28,9 @@ See the [Concourse docs](https://concourse-ci.org/resource-types.html) for more 
 * `concourse_url`: *Optional.* The external URL that points to Concourse. Defaults to the env variable `ATC_EXTERNAL_URL`.
 * `username`: *Optional.* Concourse local user (or basic auth) username. Required for non-public pipelines if using alert type `fixed` or `broke`
 * `password`: *Optional.* Concourse local user (or basic auth) password. Required for non-public pipelines if using alert type `fixed` or `broke`
+* `ca_cert`: *Optional.* A CA certificate for the Concourse instance. This is used to validate the certificate of concourse when the instance's certificate is signed by a custom authority (or itself).
+* `client_cert`: *Optional.*
+* `ignore_ssl`: *Optional.*
 
 ```yaml
 resources:

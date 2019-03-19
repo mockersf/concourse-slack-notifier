@@ -27,6 +27,8 @@ pub(crate) struct Build {
 pub(crate) struct Concourse {
     url: String,
     bearer: Option<String>,
+    ssl_configuration: Option<super::SslConfiguration>,
+    client: Option<reqwest::Client>,
 }
 
 #[derive(Serialize, Debug)]
@@ -51,6 +53,8 @@ impl Concourse {
                 format!("{}/", url)
             },
             bearer: None,
+            ssl_configuration: None,
+            client: None,
         }
     }
 
@@ -58,7 +62,9 @@ impl Concourse {
         if let Ok(token) = reqwest::Url::parse(&format!("{}sky/token", self.url))
             .map_err(|_| ())
             .and_then(|url| {
-                reqwest::Client::new()
+                self.client
+                    .clone()
+                    .expect("error configuring HTTP client")
                     .post(url)
                     .basic_auth("fly", Some("Zmx5"))
                     .form(&TokenRequest {
@@ -74,12 +80,47 @@ impl Concourse {
         {
             self.bearer = Some(token.access_token);
         }
+        self
+    }
 
+    pub(crate) fn ssl_configuration(mut self, ssl_configuration: super::SslConfiguration) -> Self {
+        self.ssl_configuration = Some(ssl_configuration);
+        self
+    }
+
+    pub(crate) fn build(mut self) -> Self {
+        let mut client = reqwest::Client::builder();
+        if let Some(true) = self.ssl_configuration.as_ref().and_then(|c| c.ignore_ssl) {
+            client = client
+                .danger_accept_invalid_certs(true)
+                .danger_accept_invalid_hostnames(true);
+        }
+        if let Some(ca_cert) = self
+            .ssl_configuration
+            .as_ref()
+            .and_then(|c| c.ca_cert.as_ref())
+        {
+            client = client.add_root_certificate(
+                reqwest::Certificate::from_pem(ca_cert.as_bytes())
+                    .expect("error reading CA certificate"),
+            );
+        }
+        if let Some(client_cert) = self
+            .ssl_configuration
+            .as_ref()
+            .and_then(|c| c.client_cert.as_ref())
+        {
+            client = client.identity(
+                reqwest::Identity::from_pkcs12_der(client_cert.cert.as_bytes(), &client_cert.key)
+                    .expect("error reading client certificate"),
+            );
+        }
+        self.client = Some(client.build().expect("error configuring HTTP client"));
         self
     }
 
     pub(crate) fn get_build(
-        &self,
+        self,
         team: &str,
         pipeline: &str,
         job: &str,
@@ -91,7 +132,7 @@ impl Concourse {
         ))
         .map_err(|_| ())
         .and_then(|url| {
-            let mut req = reqwest::Client::new().get(url);
+            let mut req = self.client.expect("error configuring HTTP client").get(url);
             if let Some(token) = self.bearer.as_ref() {
                 req = req.bearer_auth(token);
             }

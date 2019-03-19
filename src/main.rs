@@ -20,6 +20,21 @@ struct Source {
     concourse_url: Option<String>,
     #[serde(flatten)]
     credentials: Option<ConcourseCredentials>,
+    #[serde(flatten)]
+    ssl_configuration: Option<SslConfiguration>,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+struct SslConfiguration {
+    ca_cert: Option<String>,
+    client_cert: Option<ClientCert>,
+    ignore_ssl: Option<bool>,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+struct ClientCert {
+    cert: String,
+    key: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -208,6 +223,12 @@ impl Test {
                     .map(String::as_ref)
                     .unwrap_or(&metadata.atc_external_url),
             );
+
+            if let Some(ssl_configuration) = source.ssl_configuration.as_ref() {
+                concourse = concourse.ssl_configuration(ssl_configuration.clone());
+            }
+
+            concourse = concourse.build();
 
             if let Some(credentials) = &source.credentials {
                 concourse = concourse.auth(&credentials.username, &credentials.password);
