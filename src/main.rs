@@ -27,7 +27,6 @@ struct Source {
 #[derive(Deserialize, Debug, Clone)]
 struct SslConfiguration {
     ca_cert: Option<String>,
-    client_cert: Option<ClientCert>,
     ignore_ssl: Option<bool>,
 }
 

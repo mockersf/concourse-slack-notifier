@@ -29,8 +29,7 @@ See the [Concourse docs](https://concourse-ci.org/resource-types.html) for more 
 * `username`: *Optional.* Concourse local user (or basic auth) username. Required for non-public pipelines if using alert type `fixed` or `broke`
 * `password`: *Optional.* Concourse local user (or basic auth) password. Required for non-public pipelines if using alert type `fixed` or `broke`
 * `ca_cert`: *Optional.* A CA certificate for the Concourse instance. This is used to validate the certificate of Concourse when the instance's certificate is signed by a custom authority (or itself).
-* `client_cert`: *Optional.* Specifies the certificate and key to use for authenticating against the Concourse intense.
-* `ignore_ssl`: *Optional.* This option allows unsecure access to Concourse (not verifying)
+* `ignore_ssl`: *Optional.* This option allows unsecure access to Concourse (not verifying certificates)
 
 ```yaml
 resources:

@@ -105,16 +105,6 @@ impl Concourse {
                     .expect("error reading CA certificate"),
             );
         }
-        if let Some(client_cert) = self
-            .ssl_configuration
-            .as_ref()
-            .and_then(|c| c.client_cert.as_ref())
-        {
-            client = client.identity(
-                reqwest::Identity::from_pkcs12_der(client_cert.cert.as_bytes(), &client_cert.key)
-                    .expect("error reading client certificate"),
-            );
-        }
         self.client = Some(client.build().expect("error configuring HTTP client"));
         self
     }
