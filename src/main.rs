@@ -10,7 +10,7 @@ struct Test {}
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Version {
-    ver: String,
+    status: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -110,6 +110,38 @@ struct OutMetadata {
     error: Option<String>,
 }
 
+impl std::fmt::Display for OutMetadata {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match (
+            self.sent,
+            self.channel.as_ref(),
+            self.alert_type.as_ref(),
+            self.error.is_some(),
+        ) {
+            (_, _, _, true) => write!(f, "error sending notification"),
+            (false, None, None, false) => write!(f, "Did not send notification"),
+            (false, Some(channel), None, false) => {
+                write!(f, "Did not send notification to {}", channel)
+            }
+            (false, None, Some(at), false) => {
+                write!(f, "Did not send {} notification", at.message())
+            }
+            (false, Some(channel), Some(at), false) => write!(
+                f,
+                "Did not send {} notification to {}",
+                at.message(),
+                channel
+            ),
+            (true, None, None, false) => write!(f, "Sent notification"),
+            (true, Some(channel), None, false) => write!(f, "Sent notification to {}", channel),
+            (true, None, Some(at), false) => write!(f, "Sent {} notification", at.message()),
+            (true, Some(channel), Some(at), false) => {
+                write!(f, "Sent {} notification to {}", at.message(), channel)
+            }
+        }
+    }
+}
+
 fn try_to_send(url: &str, message: &slack_push::Message) -> Result<(), String> {
     reqwest::Client::new()
         .post(reqwest::Url::parse(url).map_err(|err| format!("{}", err))?)
@@ -145,7 +177,7 @@ impl Resource for Test {
     ) -> Result<InOutput<Self::Version, Self::InMetadata>, Box<std::error::Error>> {
         Ok(InOutput {
             version: Self::Version {
-                ver: String::from("static"),
+                status: String::from("static"),
             },
             metadata: None,
         })
@@ -201,7 +233,7 @@ impl Resource for Test {
 
         OutOutput {
             version: Self::Version {
-                ver: String::from("static"),
+                status: format!("{}", metadata),
             },
             metadata: Some(metadata),
         }
