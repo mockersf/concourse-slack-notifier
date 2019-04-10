@@ -106,6 +106,9 @@ impl Message {
             }
             (_, _) => {}
         }
+        if params.message_as_code {
+            message.text = message.text.map(|text| format!("```{}```", text));
+        }
         message
     }
 

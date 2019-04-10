@@ -99,6 +99,7 @@ struct OutParams {
     channel: Option<String>,
     message_file: Option<String>,
     disabled: bool,
+    message_as_code: bool,
 }
 
 #[derive(Serialize, Debug, IntoMetadataKV)]
