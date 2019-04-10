@@ -29,7 +29,8 @@ See the [Concourse docs](https://concourse-ci.org/resource-types.html) for more 
 * `username`: *Optional.* Concourse local user (or basic auth) username. Required for non-public pipelines if using alert type `fixed` or `broke`
 * `password`: *Optional.* Concourse local user (or basic auth) password. Required for non-public pipelines if using alert type `fixed` or `broke`
 * `ca_cert`: *Optional.* A CA certificate for the Concourse instance. This is used to validate the certificate of Concourse when the instance's certificate is signed by a custom authority (or itself).
-* `ignore_ssl`: *Optional.* This option allows unsecure access to Concourse (not verifying certificates)
+* `ignore_ssl`: *Optional.* This option allows unsecure access to Concourse (not verifying certificates).
+* `disabled`: *Optional.* This option will disable all notifications from this resource.
 
 ```yaml
 resources:
@@ -58,6 +59,7 @@ Sends a structured message to Slack based on the alert type and mode.
 - `message_file`: *Optional.* The path to a file to use as message. The step will fail if the file doesn't exists unless `message` is also specified.
 - `color`: *Optional.* The color of the notification bar as a hexadecimal. Defaults to the icon color of the alert type.
 - `mode`: *Optional.* The amount of information displayed in the message. See [Modes](#modes). Defaults to `normal_with_info`.
+- `disabled`: *Optional.* This notification is disabled.
 
 basic configuration:
 ```yaml

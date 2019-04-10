@@ -22,6 +22,7 @@ struct Source {
     credentials: Option<ConcourseCredentials>,
     #[serde(flatten)]
     ssl_configuration: Option<SslConfiguration>,
+    disabled: Option<bool>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -97,6 +98,7 @@ struct OutParams {
     message: Option<String>,
     channel: Option<String>,
     message_file: Option<String>,
+    disabled: bool,
 }
 
 #[derive(Serialize, Debug, IntoMetadataKV)]
@@ -245,6 +247,9 @@ impl Test {
         source: &<Self as Resource>::Source,
         params: &<Self as Resource>::OutParams,
     ) -> bool {
+        if source.disabled.unwrap_or(false) || params.disabled {
+            return true;
+        }
         if params.alert_type == AlertType::Broke || params.alert_type == AlertType::Fixed {
             let metadata = Self::build_metadata();
             let mut concourse = concourse::Concourse::new(
