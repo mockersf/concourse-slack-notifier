@@ -134,6 +134,7 @@ impl Message {
                     crate::Mode::Concise => None,
                     crate::Mode::Normal | crate::Mode::NormalWithInfo => self.text,
                 },
+                mrkdwn_in: Some(vec![String::from("text")]),
                 color: Some(self.color),
                 footer: formatted_build_info.build_url,
                 footer_icon: Some(self.icon_url),

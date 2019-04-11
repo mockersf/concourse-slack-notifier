@@ -60,7 +60,7 @@ Sends a structured message to Slack based on the alert type and mode.
 - `color`: *Optional.* The color of the notification bar as a hexadecimal. Defaults to the icon color of the alert type.
 - `mode`: *Optional.* The amount of information displayed in the message. See [Modes](#modes). Defaults to `normal_with_info`.
 - `disabled`: *Optional.* This notification is disabled.
-- `message_as_code`: *Optional.* Message text will be wrapped in ` ``` [...] ``` `
+- `message_as_code`: *Optional.* Message text will be wrapped in ` ``` [...] ``` `, if message is in mode `normal` or `normal_with_info`.
 
 basic configuration:
 ```yaml
