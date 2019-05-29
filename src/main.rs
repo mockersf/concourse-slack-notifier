@@ -98,6 +98,8 @@ struct OutParams {
     message: Option<String>,
     channel: Option<String>,
     message_file: Option<String>,
+    #[serde(default)]
+    fail_if_message_file_missing: bool,
     disabled: bool,
     message_as_code: bool,
 }
