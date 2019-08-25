@@ -23,6 +23,7 @@ struct Source {
     #[serde(flatten)]
     ssl_configuration: Option<SslConfiguration>,
     disabled: Option<bool>,
+    debug: Option<bool>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -200,7 +201,15 @@ impl Resource for SlackNotifier {
                 params.channel = source.channel.clone();
             }
 
+            if source.debug.unwrap_or(false) {
+                eprintln!("sending a message to {:?}", params.channel);
+            }
+
             if !Self::should_send_message(&source, &params) {
+                if source.debug.unwrap_or(false) {
+                    eprintln!("not sending message");
+                }
+
                 OutMetadata {
                     alert_type: Some(params.alert_type),
                     channel: params.channel,
@@ -211,7 +220,15 @@ impl Resource for SlackNotifier {
                 let message = Message::new(&params, input_path)
                     .into_slack_message(Self::build_metadata(), &params);
 
+                if source.debug.unwrap_or(false) {
+                    eprintln!("trying to send message {:?}", message);
+                }
+
                 if let Result::Err(error) = try_to_send(&source.url, &message) {
+                    if source.debug.unwrap_or(false) {
+                        eprintln!("error sending message: {:?}", error);
+                    }
+
                     OutMetadata {
                         alert_type: Some(params.alert_type),
                         channel: params.channel,
@@ -219,6 +236,9 @@ impl Resource for SlackNotifier {
                         error: Some(error),
                     }
                 } else {
+                    if source.debug.unwrap_or(false) {
+                        eprintln!("message sent");
+                    }
                     OutMetadata {
                         alert_type: Some(params.alert_type),
                         channel: params.channel,
@@ -251,9 +271,15 @@ impl SlackNotifier {
         params: &<Self as Resource>::OutParams,
     ) -> bool {
         if source.disabled.unwrap_or(false) || params.disabled {
+            if source.debug.unwrap_or(false) {
+                eprintln!("resource is disabled");
+            }
             return true;
         }
         if params.alert_type == AlertType::Broke || params.alert_type == AlertType::Fixed {
+            if source.debug.unwrap_or(false) {
+                eprintln!("checking status of last build");
+            }
             let metadata = Self::build_metadata();
             let mut concourse = concourse::Concourse::new(
                 source
@@ -271,23 +297,42 @@ impl SlackNotifier {
 
             if let Some(credentials) = &source.credentials {
                 concourse = concourse.auth(&credentials.username, &credentials.password);
+                if source.debug.unwrap_or(false) {
+                    eprintln!("authenticated to concourse: {}", concourse.is_authed());
+                }
             }
 
-            match (
-                &params.alert_type,
-                concourse
-                    .get_build(
-                        &metadata.team_name,
-                        metadata
-                            .pipeline_name
-                            .as_ref()
-                            .map(String::as_ref)
-                            .unwrap_or(""),
-                        metadata.job_name.as_ref().map(String::as_ref).unwrap_or(""),
-                        metadata.name.unwrap_or(1) - 1,
-                    )
-                    .and_then(|b| b.status),
-            ) {
+            if source.debug.unwrap_or(false) {
+                eprintln!(
+                    "getting build {:?}/{:?}/{:?} #{:?}",
+                    &metadata.team_name,
+                    metadata
+                        .pipeline_name
+                        .as_ref()
+                        .map(String::as_ref)
+                        .unwrap_or(""),
+                    metadata.job_name.as_ref().map(String::as_ref).unwrap_or(""),
+                    metadata.name.unwrap_or(1) - 1,
+                );
+            }
+
+            let last_build = concourse.get_build(
+                &metadata.team_name,
+                metadata
+                    .pipeline_name
+                    .as_ref()
+                    .map(String::as_ref)
+                    .unwrap_or(""),
+                metadata.job_name.as_ref().map(String::as_ref).unwrap_or(""),
+                metadata.name.unwrap_or(1) - 1,
+                source.debug.unwrap_or(false),
+            );
+
+            if source.debug.unwrap_or(false) {
+                eprintln!("last build: {:?}", last_build);
+            }
+
+            match (&params.alert_type, last_build.and_then(|b| b.status)) {
                 (AlertType::Broke, Some(concourse::Status::Succeeded)) => true,
                 (AlertType::Fixed, Some(concourse::Status::Succeeded)) => false,
                 (AlertType::Fixed, Some(_)) => true,

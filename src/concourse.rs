@@ -83,6 +83,10 @@ impl Concourse {
         self
     }
 
+    pub(crate) fn is_authed(&self) -> bool {
+        self.bearer.is_some()
+    }
+
     pub(crate) fn ssl_configuration(mut self, ssl_configuration: super::SslConfiguration) -> Self {
         self.ssl_configuration = Some(ssl_configuration);
         self
@@ -115,6 +119,7 @@ impl Concourse {
         pipeline: &str,
         job: &str,
         build: u32,
+        debug: bool,
     ) -> Option<Build> {
         reqwest::Url::parse(&format!(
             "{}api/v1/teams/{}/pipelines/{}/jobs/{}/builds/{}",
@@ -122,14 +127,30 @@ impl Concourse {
         ))
         .map_err(|_| ())
         .and_then(|url| {
+            if debug {
+                eprintln!("getting url {:?}", url);
+            }
             let mut req = self.client.expect("error configuring HTTP client").get(url);
             if let Some(token) = self.bearer.as_ref() {
                 req = req.bearer_auth(token);
             }
 
             req.send()
-                .map_err(|_| ())
-                .and_then(|mut req| req.json::<Build>().map_err(|_| ()))
+                .map_err(|err| {
+                    if debug {
+                        eprintln!("got an error getting build: {:?}", err);
+                    }
+                })
+                .and_then(|mut req| {
+                    if debug {
+                        eprintln!("response: {:?}", req.status());
+                    }
+                    req.json::<Build>().map_err(|err| {
+                        if debug {
+                            eprintln!("got an error deserializing: {:}", err)
+                        }
+                    })
+                })
         })
         .ok()
     }
