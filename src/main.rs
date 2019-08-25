@@ -179,7 +179,7 @@ impl Resource for SlackNotifier {
         _version: Self::Version,
         _params: Option<Self::InParams>,
         _output_path: &str,
-    ) -> Result<InOutput<Self::Version, Self::InMetadata>, Box<std::error::Error>> {
+    ) -> Result<InOutput<Self::Version, Self::InMetadata>, Box<dyn std::error::Error>> {
         Ok(InOutput {
             version: Self::Version {
                 status: String::from("static"),
