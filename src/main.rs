@@ -6,7 +6,7 @@ mod message;
 use message::Message;
 mod concourse;
 
-struct Test {}
+struct SlackNotifier {}
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Version {
@@ -158,7 +158,7 @@ fn try_to_send(url: &str, message: &slack_push::Message) -> Result<(), String> {
     Ok(())
 }
 
-impl Resource for Test {
+impl Resource for SlackNotifier {
     type Source = Source;
     type Version = Version;
 
@@ -245,7 +245,7 @@ impl Resource for Test {
     }
 }
 
-impl Test {
+impl SlackNotifier {
     fn should_send_message(
         source: &<Self as Resource>::Source,
         params: &<Self as Resource>::OutParams,
@@ -299,7 +299,7 @@ impl Test {
     }
 }
 
-create_resource!(Test);
+create_resource!(SlackNotifier);
 
 #[cfg(test)]
 mod tests {
