@@ -149,7 +149,7 @@ impl std::fmt::Display for OutMetadata {
 }
 
 fn try_to_send(url: &str, message: &slack_push::Message) -> Result<(), String> {
-    reqwest::Client::new()
+    reqwest::blocking::Client::new()
         .post(reqwest::Url::parse(url).map_err(|err| format!("{}", err))?)
         .json(message)
         .send()

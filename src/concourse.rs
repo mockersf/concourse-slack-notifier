@@ -28,7 +28,7 @@ pub(crate) struct Concourse {
     url: String,
     bearer: Option<String>,
     ssl_configuration: Option<super::SslConfiguration>,
-    client: Option<reqwest::Client>,
+    client: Option<reqwest::blocking::Client>,
 }
 
 #[derive(Serialize, Debug)]
@@ -75,7 +75,7 @@ impl Concourse {
                     })
                     .send()
                     .map_err(|_| ())
-                    .and_then(|mut req| req.json::<TokenResponse>().map_err(|_| ()))
+                    .and_then(|req| req.json::<TokenResponse>().map_err(|_| ()))
             })
         {
             self.bearer = Some(token.access_token);
@@ -93,11 +93,9 @@ impl Concourse {
     }
 
     pub(crate) fn build(mut self) -> Self {
-        let mut client = reqwest::Client::builder();
+        let mut client = reqwest::blocking::Client::builder();
         if let Some(true) = self.ssl_configuration.as_ref().and_then(|c| c.ignore_ssl) {
-            client = client
-                .danger_accept_invalid_certs(true)
-                .danger_accept_invalid_hostnames(true);
+            client = client.danger_accept_invalid_certs(true);
         }
         if let Some(ca_cert) = self
             .ssl_configuration
@@ -141,7 +139,7 @@ impl Concourse {
                         eprintln!("got an error getting build: {:?}", err);
                     }
                 })
-                .and_then(|mut req| {
+                .and_then(|req| {
                     if debug {
                         eprintln!("response: {:?}", req.status());
                     }
