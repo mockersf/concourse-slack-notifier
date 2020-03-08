@@ -274,7 +274,7 @@ impl SlackNotifier {
             if source.debug.unwrap_or(false) {
                 eprintln!("resource is disabled");
             }
-            return true;
+            return false;
         }
         if params.alert_type == AlertType::Broke || params.alert_type == AlertType::Fixed {
             if source.debug.unwrap_or(false) {
