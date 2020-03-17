@@ -77,6 +77,13 @@ impl Message {
                 ),
                 text: None,
             },
+            AlertType::Errored => Message {
+                color: String::from("#f5a623"),
+                icon_url: String::from(
+                    "https://ci.concourse-ci.org/public/images/favicon-errored.png",
+                ),
+                text: None,
+            },
             AlertType::Custom => Message {
                 color: String::from("#35495c"),
                 icon_url: String::from(
