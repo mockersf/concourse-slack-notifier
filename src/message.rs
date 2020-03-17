@@ -50,28 +50,28 @@ impl Message {
     pub(crate) fn new(params: &OutParams, input_path: &str) -> Message {
         let mut message = match params.alert_type {
             AlertType::Success | AlertType::Fixed => Message {
-                color: String::from("#32cd32"),
+                color: String::from("#11c560"),
                 icon_url: String::from(
                     "https://ci.concourse-ci.org/public/images/favicon-succeeded.png",
                 ),
                 text: None,
             },
             AlertType::Failed | AlertType::Broke => Message {
-                color: String::from("#d00000"),
+                color: String::from("#ed4b35"),
                 icon_url: String::from(
                     "https://ci.concourse-ci.org/public/images/favicon-failed.png",
                 ),
                 text: None,
             },
             AlertType::Started => Message {
-                color: String::from("#f7cd42"),
+                color: String::from("#fad43b"),
                 icon_url: String::from(
                     "https://ci.concourse-ci.org/public/images/favicon-started.png",
                 ),
                 text: None,
             },
             AlertType::Aborted => Message {
-                color: String::from("#8d4b32"),
+                color: String::from("#8b572a"),
                 icon_url: String::from(
                     "https://ci.concourse-ci.org/public/images/favicon-aborted.png",
                 ),
