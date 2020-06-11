@@ -271,7 +271,7 @@ fn previous_build_name(build_name: &String) -> String {
     format!(
         "{}",
         build_name
-            .parse::<f>()
+            .parse::<f32>()
             .map(|bn| bn.trunc() as u32)
             .unwrap_or(1)
             - 1
