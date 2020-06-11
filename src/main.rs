@@ -267,6 +267,17 @@ impl Resource for SlackNotifier {
     }
 }
 
+fn previous_build_name(build_name: &String) -> String {
+    format!(
+        "{}",
+        build_name
+            .parse::<f>()
+            .map(|bn| bn.trunc() as u32)
+            .unwrap_or(1)
+            - 1
+    )
+}
+
 impl SlackNotifier {
     fn should_send_message(
         source: &<Self as Resource>::Source,
@@ -314,7 +325,7 @@ impl SlackNotifier {
                         .map(String::as_ref)
                         .unwrap_or(""),
                     metadata.job_name.as_ref().map(String::as_ref).unwrap_or(""),
-                    metadata.name.unwrap_or(1) - 1,
+                    metadata.name.as_ref().map(previous_build_name)
                 );
             }
 
@@ -326,7 +337,12 @@ impl SlackNotifier {
                     .map(String::as_ref)
                     .unwrap_or(""),
                 metadata.job_name.as_ref().map(String::as_ref).unwrap_or(""),
-                metadata.name.unwrap_or(1) - 1,
+                metadata
+                    .name
+                    .as_ref()
+                    .map(previous_build_name)
+                    .and_then(|bn| bn.parse::<u32>().ok())
+                    .unwrap_or(1),
                 source.debug.unwrap_or(false),
             );
 
@@ -358,5 +374,11 @@ mod tests {
 
         let params = serde_json::from_str::<OutParams>(params);
         assert!(dbg!(params).is_ok());
+    }
+
+    #[test]
+    fn can_get_previous_build_number() {
+        assert_eq!(previous_build_name(&String::from("5")), "4");
+        assert_eq!(previous_build_name(&String::from("6.1")), "5");
     }
 }

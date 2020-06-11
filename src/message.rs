@@ -21,7 +21,7 @@ fn formatted_build_info_from_params(build_metadata: &BuildMetadata) -> Formatted
     if let (Some(pipeline_name), Some(job_name), Some(name)) = (
         build_metadata.pipeline_name.as_ref(),
         build_metadata.job_name.as_ref(),
-        build_metadata.name,
+        build_metadata.name.as_ref(),
     ) {
         FormattedBuildInfo {
             job_name: format!("{}/{}", pipeline_name, job_name),

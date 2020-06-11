@@ -58,7 +58,7 @@ dependencies = [
 
 [[package]]
 name = "concourse-resource"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "concourse-resource-derive 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -79,7 +79,7 @@ dependencies = [
 name = "concourse-slack-notifier"
 version = "0.1.0"
 dependencies = [
- "concourse-resource 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "concourse-resource 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "reqwest 0.10.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.111 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.54 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1138,7 +1138,7 @@ dependencies = [
 "checksum cc 1.0.35 (registry+https://github.com/rust-lang/crates.io-index)" = "5e5f3fee5eeb60324c2781f1e41286bdee933850fff9b3c672587fed5ec58c83"
 "checksum cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)" = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 "checksum cloudabi 0.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "ddfc5b9aa5d4507acaf872de71051dfd0e309860e88966e1051e462a077aac4f"
-"checksum concourse-resource 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "446b879e0d07fd6ce184fe2d93447626185bbb820a804eb56d7a56f591734035"
+"checksum concourse-resource 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "73681060b84ff299e3a59f7188945da55673de178a204e703596741eea61755e"
 "checksum concourse-resource-derive 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "6f23f672008b3ece72f53a19d6a6e4db0772fa429e2534a5c2c5df5e20ed41d9"
 "checksum core-foundation 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "286e0b41c3a20da26536c6000a280585d519fd07b3956b43aed8a79e9edce980"
 "checksum core-foundation-sys 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "716c271e8613ace48344f723b60b900a93150271e5be206212d052bbc0883efa"
