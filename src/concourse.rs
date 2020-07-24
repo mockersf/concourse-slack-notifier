@@ -42,6 +42,7 @@ struct TokenRequest<'a> {
 #[derive(Deserialize, Debug)]
 struct TokenResponse {
     access_token: String,
+    id_token: Option<String>,
 }
 
 impl Concourse {
@@ -59,6 +60,33 @@ impl Concourse {
     }
 
     pub(crate) fn auth(mut self, username: &str, password: &str) -> Self {
+        if let Ok(token) = reqwest::Url::parse(&format!("{}sky/issuer/token", self.url))
+            .map_err(|_| ())
+            .and_then(|url| {
+                self.client
+                    .clone()
+                    .expect("error configuring HTTP client")
+                    .post(url)
+                    .basic_auth("fly", Some("Zmx5"))
+                    .form(&TokenRequest {
+                        grant_type: "password",
+                        username,
+                        password,
+                        scope: "openid profile email groups federated:id",
+                    })
+                    .send()
+                    .map_err(|_| ())
+                    .and_then(|req| req.json::<TokenResponse>().map_err(|_| ()))
+            })
+        {
+            self.bearer = token.id_token;
+        } else {
+            self = self.old_auth(username, password);
+        }
+        self
+    }
+
+    pub(crate) fn old_auth(mut self, username: &str, password: &str) -> Self {
         if let Ok(token) = reqwest::Url::parse(&format!("{}sky/token", self.url))
             .map_err(|_| ())
             .and_then(|url| {
