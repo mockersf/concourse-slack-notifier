@@ -5,7 +5,7 @@ authors = ["François Mockers <mockersf@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-reqwest = { version = "0.10", features = [ "blocking", "json" ] }
+reqwest = { version = "0.11", features = [ "blocking", "json" ] }
 concourse-resource = "0.2"
 slack_push = { git = "https://github.com/mockersf/slack-push" }
 serde = { version = "1.0", features = [ "derive" ] }
