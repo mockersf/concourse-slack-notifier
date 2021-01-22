@@ -1,4 +1,5 @@
 use serde::Serialize;
+use serde_json::{Map, Value};
 
 use crate::{AlertType, OutParams};
 use concourse_resource::BuildMetadata;
@@ -10,6 +11,7 @@ pub struct Message {
     pub icon_url: String,
 }
 
+#[derive(Debug, PartialEq)]
 struct FormattedBuildInfo {
     job_name: String,
     build_name: String,
@@ -23,18 +25,32 @@ fn formatted_build_info_from_params(build_metadata: &BuildMetadata) -> Formatted
         build_metadata.job_name.as_ref(),
         build_metadata.name.as_ref(),
     ) {
-        FormattedBuildInfo {
-            job_name: format!("{}/{}", pipeline_name, job_name),
-            build_name: format!("{}/{} #{}", pipeline_name, job_name, name,),
-            build_number: format!("#{}", name),
-            build_url: Some(format!(
+        let pipeline_ref = if let Some(instance_vars) = &build_metadata.pipeline_instance_vars {
+            format!("{}/{}", pipeline_name, format_instance_vars(instance_vars))
+        } else {
+            pipeline_name.to_string()
+        };
+        let build_url = {
+            let base_url = format!(
                 "{}/teams/{}/pipelines/{}/jobs/{}/builds/{}",
                 build_metadata.atc_external_url,
                 urlencoding::encode(&build_metadata.team_name),
                 urlencoding::encode(&pipeline_name),
                 urlencoding::encode(&job_name),
                 name,
-            )),
+            );
+            if let Some(instance_vars) = &build_metadata.pipeline_instance_vars {
+                let instance_vars = serde_json::to_string(&instance_vars).unwrap();
+                format!("{}?vars={}", base_url, urlencoding::encode(&instance_vars))
+            } else {
+                base_url
+            }
+        };
+        FormattedBuildInfo {
+            job_name: format!("{}/{}", pipeline_ref, job_name),
+            build_name: format!("{}/{} #{}", pipeline_ref, job_name, name),
+            build_number: format!("#{}", name),
+            build_url: Some(build_url),
         }
     } else {
         FormattedBuildInfo {
@@ -44,6 +60,16 @@ fn formatted_build_info_from_params(build_metadata: &BuildMetadata) -> Formatted
             build_url: None,
         }
     }
+}
+
+fn format_instance_vars(instance_vars: &Map<String, Value>) -> String {
+    let mut parts = Vec::with_capacity(instance_vars.len());
+    for (k, v) in instance_vars.iter() {
+        let v = serde_json::to_string(v).unwrap();
+        parts.push(format!("{}:{}", k, v));
+    }
+    parts.sort();
+    parts.join(",")
 }
 
 impl Message {
@@ -179,5 +205,67 @@ impl Message {
 
             ..Default::default()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn format_build_info() {
+        assert_eq!(
+            formatted_build_info_from_params(&BuildMetadata {
+                id: "123".to_owned(),
+                name: Some("1".to_owned()),
+                job_name: Some("job".to_owned()),
+                pipeline_name: Some("pipeline".to_owned()),
+                pipeline_instance_vars: None,
+                team_name: "team".to_owned(),
+                atc_external_url: "http://example.com".to_owned(),
+            }),
+            FormattedBuildInfo {
+                job_name: "pipeline/job".to_owned(),
+                build_name: "pipeline/job #1".to_owned(),
+                build_number: "#1".to_owned(),
+                build_url: Some(
+                    "http://example.com/teams/team/pipelines/pipeline/jobs/job/builds/1".to_owned()
+                ),
+            }
+        );
+    }
+
+    #[test]
+    fn format_build_info_pipeline_instance() {
+        let instance_vars: Map<String, Value> = serde_json::from_str(
+            r#"{
+                "foo": "bar",
+                "num": 1,
+                "some_nested": {"json": "here"}
+            }"#,
+        )
+        .unwrap();
+        let expected_pipeline_ref = r#"pipeline/foo:"bar",num:1,some_nested:{"json":"here"}"#;
+        let expected_query_string = "vars=%7B%22foo%22%3A%22bar%22%2C%22num%22%3A1%2C%22some_nested%22%3A%7B%22json%22%3A%22here%22%7D%7D";
+        assert_eq!(
+            formatted_build_info_from_params(&BuildMetadata {
+                id: "123".to_owned(),
+                name: Some("1".to_owned()),
+                job_name: Some("job".to_owned()),
+                pipeline_name: Some("pipeline".to_owned()),
+                pipeline_instance_vars: Some(instance_vars),
+                team_name: "team".to_owned(),
+                atc_external_url: "http://example.com".to_owned(),
+            }),
+            FormattedBuildInfo {
+                job_name: format!("{}/job", expected_pipeline_ref),
+                build_name: format!("{}/job #1", expected_pipeline_ref),
+                build_number: "#1".to_owned(),
+                build_url: Some(format!(
+                    "http://example.com/teams/team/pipelines/pipeline/jobs/job/builds/1?{}",
+                    expected_query_string
+                )),
+            }
+        );
     }
 }

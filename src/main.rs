@@ -336,6 +336,7 @@ impl SlackNotifier {
                     .as_ref()
                     .map(String::as_ref)
                     .unwrap_or(""),
+                metadata.pipeline_instance_vars,
                 metadata.job_name.as_ref().map(String::as_ref).unwrap_or(""),
                 metadata
                     .name

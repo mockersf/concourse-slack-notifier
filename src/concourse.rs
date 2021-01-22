@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_json::{Map, Value};
 
 #[derive(PartialEq, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
@@ -20,6 +21,7 @@ pub(crate) struct Build {
     // job_name: String,
     // api_url: String,
     // pipeline_name: String,
+    // pipeline_instance_vars: Option<Map<String, Value>>,
     // start_time: u64,
     // end_time: u64,
 }
@@ -143,13 +145,21 @@ impl Concourse {
         self,
         team: &str,
         pipeline: &str,
+        pipeline_instance_vars: Option<Map<String, Value>>,
         job: &str,
         build: u32,
         debug: bool,
     ) -> Option<Build> {
+        let query_params = match pipeline_instance_vars {
+            Some(instance_vars) => {
+                let instance_vars = serde_json::to_string(&instance_vars).ok()?;
+                format!("?vars={}", urlencoding::encode(&instance_vars))
+            }
+            None => "".to_owned(),
+        };
         reqwest::Url::parse(&format!(
-            "{}api/v1/teams/{}/pipelines/{}/jobs/{}/builds/{}",
-            self.url, team, pipeline, job, build
+            "{}api/v1/teams/{}/pipelines/{}/jobs/{}/builds/{}{}",
+            self.url, team, pipeline, job, build, query_params
         ))
         .map_err(|_| ())
         .and_then(|url| {
