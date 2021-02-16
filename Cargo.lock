@@ -80,9 +80,9 @@ dependencies = [
 
 [[package]]
 name = "concourse-resource"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73681060b84ff299e3a59f7188945da55673de178a204e703596741eea61755e"
+checksum = "2fd981419229f45ff6dc9635d5505a9567c45ca990babe7d3a0f657cc44925e6"
 dependencies = [
  "concourse-resource-derive",
  "serde",
