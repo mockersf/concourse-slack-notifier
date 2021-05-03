@@ -760,7 +760,7 @@ checksum = "c111b5bd5695e56cffe5129854aa230b39c93a305372fdbb2668ca2394eea9f8"
 [[package]]
 name = "slack_push"
 version = "0.1.0"
-source = "git+https://github.com/mockersf/slack-push#3f70bcdad822ffd2f77aedd080d9a91fe8272427"
+source = "git+https://github.com/mockersf/slack-push#aa1d9e3e17ecb9ee86e4c3d6df88380a4d781040"
 dependencies = [
  "serde",
 ]
