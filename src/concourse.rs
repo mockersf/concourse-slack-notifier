@@ -26,7 +26,7 @@ pub(crate) struct Build {
 
 pub(crate) struct Concourse {
     url: String,
-    bearer: Option<String>,
+    bearer: String,
     ssl_configuration: Option<super::SslConfiguration>,
     client: Option<reqwest::blocking::Client>,
 }
@@ -53,7 +53,7 @@ impl Concourse {
             } else {
                 format!("{}/", url)
             },
-            bearer: None,
+            bearer: String::from(""),
             ssl_configuration: None,
             client: None,
         }
@@ -79,7 +79,7 @@ impl Concourse {
                     .and_then(|req| req.json::<TokenResponse>().map_err(|_| ()))
             })
         {
-            self.bearer = token.id_token;
+            self.bearer = token.access_token;
         } else {
             self = self.old_auth(username, password);
         }
@@ -106,13 +106,13 @@ impl Concourse {
                     .and_then(|req| req.json::<TokenResponse>().map_err(|_| ()))
             })
         {
-            self.bearer = Some(token.access_token);
+            self.bearer = token.access_token;
         }
         self
     }
 
     pub(crate) fn is_authed(&self) -> bool {
-        self.bearer.is_some()
+        !self.bearer.is_empty()
     }
 
     pub(crate) fn ssl_configuration(mut self, ssl_configuration: super::SslConfiguration) -> Self {
@@ -156,9 +156,14 @@ impl Concourse {
             if debug {
                 eprintln!("getting url {:?}", url);
             }
-            let mut req = self.client.expect("error configuring HTTP client").get(url);
-            if let Some(token) = self.bearer.as_ref() {
+            let mut req = self.client.as_ref().expect("error configuring HTTP client").get(url);
+            let authed = self.is_authed();
+            let token = &self.bearer;
+            if authed {
                 req = req.bearer_auth(token);
+                if debug {
+                    eprintln!("token {:?}", token);
+                }
             }
 
             req.send()
